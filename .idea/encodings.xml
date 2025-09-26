@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/backend/audiencia-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/autoridad-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/bitacora-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/distrito-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/eureka-server/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/gateway/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/reporte-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/sala-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/backend/usuario-service/src/main/java" charset="UTF-8" />
+  </component>
+</project>
