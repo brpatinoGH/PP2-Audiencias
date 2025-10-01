@@ -8,6 +8,7 @@ spring:
     password: 1234
     driver-class-name: org.postgresql.Driver
 
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -16,3 +17,7 @@ spring:
       hibernate:
         format_sql: true
     database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+sala:
+  service:
+    url: http://localhost:8084
