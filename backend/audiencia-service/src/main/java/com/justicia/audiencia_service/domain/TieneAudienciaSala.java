@@ -27,15 +27,3 @@ public class TieneAudienciaSala {
     private UUID salaId;
 }
 
-@Embeddable
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-class TieneAudienciaSalaId implements Serializable {
-
-    @Column(name = "audiencia_id", columnDefinition = "UUID")
-    private UUID audienciaId;
-
-    @Column(name = "sala_id", columnDefinition = "UUID")
-    private UUID salaId;
-}

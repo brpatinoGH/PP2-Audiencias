@@ -1,8 +1,14 @@
 package com.justicia.autoridad_service.domain;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "autoridad")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Autoridad extends BaseEntity {
 
     @Column(name = "nombre", length = 255)

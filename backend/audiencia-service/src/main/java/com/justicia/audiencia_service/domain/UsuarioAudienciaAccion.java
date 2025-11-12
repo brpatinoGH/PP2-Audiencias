@@ -1,9 +1,15 @@
 package com.justicia.audiencia_service.domain;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "usuario_audiencia_accion")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class UsuarioAudienciaAccion {
 
     @EmbeddedId

@@ -26,14 +26,3 @@ public class TieneUsuarioDistrito {
     private UUID distritoJudicialId;
 }
 
-@Embeddable
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-class TieneUsuarioDistritoId implements Serializable {
-    @Column(name = "usuario_id", columnDefinition = "UUID")
-    private UUID usuarioId;
-
-    @Column(name = "distrito_judicial_id", columnDefinition = "UUID")
-    private UUID distritoJudicialId;
-}

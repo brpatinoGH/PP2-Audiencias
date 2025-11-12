@@ -3,11 +3,16 @@ package com.justicia.sala_service.domain;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.UUID;
+
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
-@Data
 @Table(name = "sala")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Sala extends BaseEntity {
 
     @Column(name = "nombre", length = 255)
