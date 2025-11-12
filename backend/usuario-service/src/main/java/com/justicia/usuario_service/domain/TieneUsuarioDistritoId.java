@@ -1,4 +1,4 @@
-package com.justicia.audiencia_service.domain;
+package com.justicia.usuario_service.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -13,12 +13,10 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UsuarioAudienciaAccionId implements Serializable {
-
+public class TieneUsuarioDistritoId implements Serializable {
     @Column(name = "usuario_id", columnDefinition = "UUID")
     private UUID usuarioId;
 
-    @Column(name = "audiencia_id", columnDefinition = "UUID")
-    private UUID audienciaId;
-
+    @Column(name = "distrito_judicial_id", columnDefinition = "UUID")
+    private UUID distritoJudicialId;
 }

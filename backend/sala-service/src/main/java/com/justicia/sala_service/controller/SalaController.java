@@ -4,6 +4,7 @@ import com.justicia.sala_service.dto.SalaRequest;
 import com.justicia.sala_service.dto.SalaResponse;
 import com.justicia.sala_service.exception.BusinessException;
 import com.justicia.sala_service.exception.NotFoundException;
+import com.justicia.sala_service.security.RoleValidator;
 import com.justicia.sala_service.service.SalaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,9 +20,11 @@ import java.util.UUID;
 public class SalaController {
 
     private final SalaService salaService;
+    private final RoleValidator roleValidator;
 
     @PostMapping
     public ResponseEntity<SalaResponse> crear(@RequestBody SalaRequest request) {
+        roleValidator.requireDirector();
         return ResponseEntity.status(HttpStatus.CREATED).body(salaService.crear(request));
     }
 
@@ -29,6 +32,7 @@ public class SalaController {
     public ResponseEntity<SalaResponse> actualizar(
             @PathVariable UUID id,
             @RequestBody SalaRequest request) {
+        roleValidator.requireDirector();
         return ResponseEntity.ok(salaService.actualizar(id, request));
     }
 

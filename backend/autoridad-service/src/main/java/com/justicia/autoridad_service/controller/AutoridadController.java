@@ -4,6 +4,7 @@ import com.justicia.autoridad_service.dto.AutoridadRequest;
 import com.justicia.autoridad_service.dto.AutoridadResponse;
 import com.justicia.autoridad_service.exception.BusinessException;
 import com.justicia.autoridad_service.exception.NotFoundException;
+import com.justicia.autoridad_service.security.RoleValidator;
 import com.justicia.autoridad_service.service.AutoridadService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,28 +20,21 @@ import java.util.UUID;
 public class AutoridadController {
 
     private final AutoridadService autoridadService;
+    private final RoleValidator roleValidator; // ✅ agregado
 
     @PostMapping
     public ResponseEntity<AutoridadResponse> crear(@RequestBody AutoridadRequest request) {
-        try {
-            AutoridadResponse response = autoridadService.crear(request);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (BusinessException ex) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
+        roleValidator.requireDirector();
+        AutoridadResponse response = autoridadService.crear(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<AutoridadResponse> actualizar(
             @PathVariable UUID id,
             @RequestBody AutoridadRequest request) {
-        try {
-            return ResponseEntity.ok(autoridadService.actualizar(id, request));
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        } catch (BusinessException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
+        roleValidator.requireDirector();
+        return ResponseEntity.ok(autoridadService.actualizar(id, request));
     }
 
     @GetMapping
@@ -50,11 +44,7 @@ public class AutoridadController {
 
     @GetMapping("/tipo/{tipo}")
     public ResponseEntity<List<AutoridadResponse>> listarPorTipo(@PathVariable String tipo) {
-        try {
-            return ResponseEntity.ok(autoridadService.listarPorTipo(tipo));
-        } catch (IllegalArgumentException e) {
-            throw new BusinessException("Tipo inválido. Use JUEZ, FISCAL o DEFENSOR.");
-        }
+        return ResponseEntity.ok(autoridadService.listarPorTipo(tipo));
     }
 
     @GetMapping("/estado/{estado}")
@@ -66,12 +56,8 @@ public class AutoridadController {
     public ResponseEntity<AutoridadResponse> cambiarEstado(
             @PathVariable UUID id,
             @RequestParam String nuevoEstado) {
-        try {
-            AutoridadResponse response = autoridadService.cambiarEstado(id, nuevoEstado);
-            return ResponseEntity.ok(response);
-        } catch (NotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
+        roleValidator.requireDirector();
+        return ResponseEntity.ok(autoridadService.cambiarEstado(id, nuevoEstado));
     }
 
     @ExceptionHandler(BusinessException.class)
