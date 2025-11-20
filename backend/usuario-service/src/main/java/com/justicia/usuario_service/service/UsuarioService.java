@@ -29,9 +29,6 @@ public class UsuarioService {
     private final TieneUsuarioDistritoRepository tieneUsuarioDistritoRepository;
     private final JwtUtil jwtUtil;
 
-    // ------------------------------------
-    // CU11 - Registrar Usuario
-    // ------------------------------------
     @Transactional
     public UsuarioResponse crear(UsuarioRequest req) {
         validarRequest(req);
@@ -62,9 +59,6 @@ public class UsuarioService {
         return mapToResponse(saved);
     }
 
-    // ------------------------------------
-    // CU12 - Actualizar Usuario
-    // ------------------------------------
     @Transactional
     public UsuarioResponse actualizar(UUID id, UsuarioRequest req) {
 
@@ -102,9 +96,6 @@ public class UsuarioService {
         return mapToResponse(usuarioRepository.save(u));
     }
 
-    // ------------------------------------
-    // CU13 - Cambiar Estado
-    // ------------------------------------
     @Transactional
     public UsuarioResponse cambiarEstado(UUID id, String nuevoEstado) {
         Usuario u = usuarioRepository.findById(id)
@@ -121,9 +112,6 @@ public class UsuarioService {
         return mapToResponse(usuarioRepository.save(u));
     }
 
-    // ------------------------------------
-    // CU14 - Listar Usuarios
-    // ------------------------------------
     @Transactional(readOnly = true)
     public List<UsuarioResponse> listarTodos() {
         return usuarioRepository.findAll()
@@ -131,9 +119,6 @@ public class UsuarioService {
                 .collect(Collectors.toList());
     }
 
-    // ------------------------------------
-    // LOGIN
-    // ------------------------------------
     @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest req) {
         Usuario u = usuarioRepository.findByMail(req.getMail())
@@ -153,10 +138,6 @@ public class UsuarioService {
         return res;
     }
 
-
-    // ------------------------------------
-    // Helpers
-    // ------------------------------------
     private void validarRequest(UsuarioRequest req) {
         if (req.getNombre() == null || req.getNombre().isBlank())
             throw new BusinessException("El nombre es obligatorio");
@@ -178,4 +159,13 @@ public class UsuarioService {
         res.setRol(u.getRol().name());
         return res;
     }
+
+    @Transactional(readOnly = true)
+    public UUID obtenerDistrito(UUID usuarioId) {
+        return tieneUsuarioDistritoRepository
+                .findDistritoIdByUsuarioId(usuarioId)
+                .orElseThrow(() -> new NotFoundException("El usuario no tiene distrito asignado"));
+    }
+
+
 }

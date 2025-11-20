@@ -6,11 +6,12 @@ import com.justicia.autoridad_service.dto.AutoridadResponse;
 import com.justicia.autoridad_service.exception.BusinessException;
 import com.justicia.autoridad_service.exception.NotFoundException;
 import com.justicia.autoridad_service.repository.AutoridadRepository;
+import com.justicia.autoridad_service.client.UsuarioClient;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -20,23 +21,46 @@ import java.util.stream.Collectors;
 public class AutoridadService {
 
     private final AutoridadRepository autoridadRepository;
+    private final UsuarioClient usuarioClient;
+    private final HttpServletRequest httpReq;
 
     @Transactional
     public AutoridadResponse crear(AutoridadRequest req) {
+
         if (req.getNombre() == null || req.getNombre().isBlank())
             throw new BusinessException("El nombre es obligatorio");
+
+        if (req.getTipo() == null)
+            throw new BusinessException("El tipo es obligatorio");
+
+        if (req.getDistritoId() == null)
+            throw new BusinessException("El distrito es obligatorio");
+
+        String rol = httpReq.getHeader("X-Rol");
+        UUID usuarioId = UUID.fromString(httpReq.getHeader("X-Usuario-Id"));
+
+        System.out.println("DEBUG >> ROL LLEGÓ A AUTORIDAD SERVICE = " + rol);
+        System.out.println("DEBUG >> USER_ID LLEGÓ A AUTORIDAD SERVICE = " + usuarioId);
+
+        if (rol.equalsIgnoreCase("OPERADOR")) {
+
+            UUID distritoOperador = usuarioClient.obtenerDistrito(usuarioId);
+
+            if (!distritoOperador.equals(req.getDistritoId())) {
+                throw new BusinessException("El operador solo puede gestionar su propio distrito");
+            }
+        }
 
         Autoridad autoridad = new Autoridad();
         autoridad.setNombre(req.getNombre());
         autoridad.setMail(req.getMail());
-        autoridad.setEstado(req.getEstado() != null ? req.getEstado() : "ACTIVO");
+        autoridad.setEstado("ACTIVO");
+        autoridad.setDistritoId(req.getDistritoId());
 
-        if (req.getTipo() != null && !req.getTipo().isBlank()) {
-            try {
-                autoridad.setTipo(Autoridad.Tipo.valueOf(req.getTipo().trim().toUpperCase()));
-            } catch (IllegalArgumentException ex) {
-                throw new BusinessException("Tipo de autoridad inválido. Valores válidos: JUEZ, FISCAL, DEFENSOR");
-            }
+        try {
+            autoridad.setTipo(Autoridad.Tipo.valueOf(req.getTipo().trim().toUpperCase()));
+        } catch (IllegalArgumentException ex) {
+            throw new BusinessException("Tipo inválido. Valores válidos: JUEZ, FISCAL, DEFENSOR");
         }
 
         Autoridad saved = autoridadRepository.save(autoridad);
@@ -45,8 +69,20 @@ public class AutoridadService {
 
     @Transactional
     public AutoridadResponse actualizar(UUID id, AutoridadRequest req) {
+
+        String rol = httpReq.getHeader("X-Rol");
+        UUID usuarioId = UUID.fromString(httpReq.getHeader("X-Usuario-Id"));
+
         Autoridad autoridad = autoridadRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Autoridad no encontrada"));
+
+        if (rol.equalsIgnoreCase("OPERADOR")) {
+            UUID distritoOperador = usuarioClient.obtenerDistrito(usuarioId);
+
+            if (!distritoOperador.equals(autoridad.getDistritoId())) {
+                throw new BusinessException("El operador no puede modificar autoridades de otro distrito");
+            }
+        }
 
         if (req.getNombre() != null) autoridad.setNombre(req.getNombre());
         if (req.getMail() != null) autoridad.setMail(req.getMail());
@@ -55,7 +91,7 @@ public class AutoridadService {
             try {
                 autoridad.setTipo(Autoridad.Tipo.valueOf(req.getTipo().trim().toUpperCase()));
             } catch (IllegalArgumentException ex) {
-                throw new BusinessException("Tipo de autoridad inválido. Valores válidos: JUEZ, FISCAL, DEFENSOR");
+                throw new BusinessException("Tipo inválido. Valores válidos: JUEZ, FISCAL, DEFENSOR");
             }
         }
 
@@ -88,21 +124,23 @@ public class AutoridadService {
 
     @Transactional
     public AutoridadResponse cambiarEstado(UUID id, String nuevoEstado) {
+
+        String rol = httpReq.getHeader("X-Rol");
+        UUID usuarioId = UUID.fromString(httpReq.getHeader("X-Usuario-Id"));
+
         Autoridad autoridad = autoridadRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Autoridad no encontrada"));
 
+        if (rol.equalsIgnoreCase("OPERADOR")) {
+            UUID distritoOperador = usuarioClient.obtenerDistrito(usuarioId);
+
+            if (!distritoOperador.equals(autoridad.getDistritoId())) {
+                throw new BusinessException("No puede cambiar el estado de autoridades de otro distrito");
+            }
+        }
+
         autoridad.setEstado(nuevoEstado);
-
         return mapToResponse(autoridadRepository.save(autoridad));
-    }
-
-    private void validarRequest(AutoridadRequest req) {
-        if (req.getNombre() == null || req.getNombre().isBlank())
-            throw new BusinessException("El nombre de la autoridad es obligatorio");
-        if (req.getMail() == null || req.getMail().isBlank())
-            throw new BusinessException("El mail de la autoridad es obligatorio");
-        if (req.getTipo() == null)
-            throw new BusinessException("El tipo de autoridad es obligatorio");
     }
 
     private AutoridadResponse mapToResponse(Autoridad a) {
@@ -112,6 +150,7 @@ public class AutoridadService {
         res.setMail(a.getMail());
         res.setEstado(a.getEstado());
         res.setTipo(a.getTipo() != null ? a.getTipo().name() : null);
+        res.setDistritoId(a.getDistritoId());
         return res;
     }
 

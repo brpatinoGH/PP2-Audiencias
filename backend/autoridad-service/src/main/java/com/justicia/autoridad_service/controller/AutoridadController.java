@@ -20,11 +20,11 @@ import java.util.UUID;
 public class AutoridadController {
 
     private final AutoridadService autoridadService;
-    private final RoleValidator roleValidator; // ✅ agregado
+    private final RoleValidator roleValidator;
 
     @PostMapping
     public ResponseEntity<AutoridadResponse> crear(@RequestBody AutoridadRequest request) {
-        roleValidator.requireDirector();
+        roleValidator.requireDirectorOrOperador();
         AutoridadResponse response = autoridadService.crear(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -33,7 +33,7 @@ public class AutoridadController {
     public ResponseEntity<AutoridadResponse> actualizar(
             @PathVariable UUID id,
             @RequestBody AutoridadRequest request) {
-        roleValidator.requireDirector();
+        roleValidator.requireDirectorOrOperador();
         return ResponseEntity.ok(autoridadService.actualizar(id, request));
     }
 
@@ -56,7 +56,7 @@ public class AutoridadController {
     public ResponseEntity<AutoridadResponse> cambiarEstado(
             @PathVariable UUID id,
             @RequestParam String nuevoEstado) {
-        roleValidator.requireDirector();
+        roleValidator.requireDirectorOrOperador();
         return ResponseEntity.ok(autoridadService.cambiarEstado(id, nuevoEstado));
     }
 

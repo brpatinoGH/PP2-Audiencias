@@ -24,7 +24,7 @@ public class SalaController {
 
     @PostMapping
     public ResponseEntity<SalaResponse> crear(@RequestBody SalaRequest request) {
-        roleValidator.requireDirector();
+        roleValidator.requireDirectorOrOperador();
         return ResponseEntity.status(HttpStatus.CREATED).body(salaService.crear(request));
     }
 
@@ -32,7 +32,7 @@ public class SalaController {
     public ResponseEntity<SalaResponse> actualizar(
             @PathVariable UUID id,
             @RequestBody SalaRequest request) {
-        roleValidator.requireDirector();
+        roleValidator.requireDirectorOrOperador();
         return ResponseEntity.ok(salaService.actualizar(id, request));
     }
 
@@ -45,6 +45,12 @@ public class SalaController {
     public ResponseEntity<List<SalaResponse>> listarPorDistrito(@PathVariable UUID distritoId) {
         return ResponseEntity.ok(salaService.listarPorDistrito(distritoId));
     }
+
+    @GetMapping("/{id}")
+    public SalaResponse obtenerSala(@PathVariable UUID id) {
+        return salaService.obtenerPorId(id);
+    }
+
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<String> handleBusinessException(BusinessException ex) {

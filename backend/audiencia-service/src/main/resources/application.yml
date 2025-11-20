@@ -21,3 +21,9 @@ spring:
 sala:
   service:
     url: http://localhost:8084
+
+logging:
+  level:
+    com.justicia.audiencia_service: DEBUG
+    org.springframework.cloud.openfeign: DEBUG
+    feign: DEBUG

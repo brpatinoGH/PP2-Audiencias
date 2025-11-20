@@ -57,4 +57,10 @@ public class UsuarioController {
         request.getSession().setAttribute("rol", res.getRol());
         return ResponseEntity.ok(res);
     }
+
+    @GetMapping("/{id}/distrito")
+    public UUID obtenerDistrito(@PathVariable UUID id) {
+        return usuarioService.obtenerDistrito(id);
+    }
+
 }

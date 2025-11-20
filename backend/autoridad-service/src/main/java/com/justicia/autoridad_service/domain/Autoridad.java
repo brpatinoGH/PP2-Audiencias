@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Entity
 @Table(name = "autoridad")
 @Data
@@ -23,6 +25,9 @@ public class Autoridad extends BaseEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo", length = 20)
     private Tipo tipo;
+
+    @Column(name = "distrito_id", nullable = false)
+    private UUID distritoId;
 
     public enum Tipo { JUEZ, FISCAL, DEFENSOR }
 }

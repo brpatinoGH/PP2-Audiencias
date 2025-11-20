@@ -45,12 +45,14 @@ public class Audiencia extends BaseEntity {
     @Column(name = "fecha_inscripcion")
     private LocalDateTime fechaInscripcion;
 
-    // Relación con Usuario (solo UUID, no entidad completa)
     @Column(name = "creado_por_usuario_id", columnDefinition = "UUID")
     private UUID creadoPorUsuarioId;
 
     @Column(name = "modificado_por_usuario_id", columnDefinition = "UUID")
     private UUID modificadoPorUsuarioId;
+
+    @Column(name = "distrito_id", columnDefinition = "UUID", nullable = false)
+    private UUID distritoId;
 
     @OneToMany(mappedBy = "audiencia", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UsuarioAudienciaAccion> acciones = new HashSet<>();

@@ -1,4 +1,4 @@
-package com.justicia.usuario_service.config;
+package com.justicia.audiencia_service.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,8 +14,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/usuarios/login").permitAll()
-                        .anyRequest().permitAll()     // 👈 IMPORTANTE
+                        .anyRequest().permitAll()
                 )
                 .formLogin(login -> login.disable())
                 .httpBasic(basic -> basic.disable());

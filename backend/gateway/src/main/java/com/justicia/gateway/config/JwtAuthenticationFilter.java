@@ -6,12 +6,13 @@ import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 @Component
-@Order(1)
+@Order(-1)
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter implements GlobalFilter {
 
@@ -19,9 +20,12 @@ public class JwtAuthenticationFilter implements GlobalFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        String path = exchange.getRequest().getPath().toString();
 
-        if (path.contains("/api/usuarios/login") || path.contains("/swagger")) {
+        String path = exchange.getRequest().getPath().toString();
+        System.out.println("PATH RAW: '" + path + "'");
+
+        if (path.matches(".*?/api/usuarios/login/?$")) {
+            System.out.println("LOGIN DETECTADO → NO SE VALIDA TOKEN");
             return chain.filter(exchange);
         }
 
@@ -32,27 +36,29 @@ public class JwtAuthenticationFilter implements GlobalFilter {
             return exchange.getResponse().setComplete();
         }
 
-        String token = authHeader.substring(7);
+        String token = authHeader.substring(7).trim();
 
         try {
             Claims claims = jwtUtil.validarToken(token);
             String userId = claims.getSubject();
             String rol = claims.get("rol", String.class);
 
-            System.out.println("GATEWAY: Token validado. ROL extraído: " + rol);
+            System.out.println("TOKEN VÁLIDO → ROL: " + rol);
+
+            ServerHttpRequest modifiedRequest = exchange.getRequest()
+                    .mutate()
+                    .header("X-Usuario-Id", userId)
+                    .header("X-Rol", rol)
+                    .build();
 
             ServerWebExchange modifiedExchange = exchange.mutate()
-                    .request(builder -> builder
-                            .header("Authorization", authHeader)
-                            .header("X-Usuario-Id", userId)
-                            .header("X-Rol", rol)
-                    )
+                    .request(modifiedRequest)
                     .build();
 
             return chain.filter(modifiedExchange);
 
         } catch (Exception e) {
-            System.err.println("GATEWAY: Error al validar token - " + e.getMessage());
+            System.out.println("ERROR JWT: " + e.getMessage());
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
