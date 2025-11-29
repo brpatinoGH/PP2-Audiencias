@@ -20,4 +20,5 @@ public class AudienciaRequest {
     private UUID autoridadId;
     private UUID distritoId;
 
+    private UUID salaId;
 }

@@ -1,5 +1,6 @@
 package com.justicia.audiencia_service.service;
 
+import com.justicia.audiencia_service.client.AutoridadClient;
 import com.justicia.audiencia_service.client.SalaClient;
 import com.justicia.audiencia_service.client.UsuarioClient;
 import com.justicia.audiencia_service.domain.*;
@@ -28,6 +29,7 @@ public class AudienciaService {
     private final SalaClient salaClient;
     private final UsuarioClient usuarioClient;
     private final HttpServletRequest httpReq;
+    private final AutoridadClient autoridadClient;
 
     @Transactional
     public AudienciaResponse crear(AudienciaRequest req) {
@@ -38,11 +40,11 @@ public class AudienciaService {
         validateBasicRequest(req);
 
         String rol = httpReq.getHeader("X-Rol");
-        UUID usuarioId = UUID.fromString(httpReq.getHeader("X-Usuario-Id"));
+        String uidStr = httpReq.getHeader("X-Usuario-Id");
+        UUID usuarioId = (uidStr != null) ? UUID.fromString(uidStr) : UUID.randomUUID();
 
         if ("OPERADOR".equalsIgnoreCase(rol)) {
             UUID distritoOperador = usuarioClient.obtenerDistrito(usuarioId);
-
             if (!distritoOperador.equals(req.getDistritoId())) {
                 throw new BusinessException("El operador solo puede crear audiencias en su propio distrito");
             }
@@ -69,20 +71,71 @@ public class AudienciaService {
             );
         }
 
+        if (req.getSalaId() != null) {
+            SalaClient.SalaDto sala = salaClient.getSalaById(req.getSalaId());
+
+            if (sala == null) {
+                throw new NotFoundException("La sala indicada no existe");
+            }
+
+            if ("OPERADOR".equalsIgnoreCase(rol)) {
+                UUID distritoOperador = usuarioClient.obtenerDistrito(usuarioId);
+                if (!sala.distritoJudicialId.equals(distritoOperador)) {
+                    throw new BusinessException("El operador solo puede asignar salas de su distrito");
+                }
+            }
+
+            validarConflictosSala(a, req.getSalaId());
+        }
+
         Audiencia saved = audienciaRepository.save(a);
 
         if (req.getAutoridadId() != null) {
-            TieneAudienciaAutoridadId id =
-                    new TieneAudienciaAutoridadId(saved.getId(), req.getAutoridadId());
+            TieneAudienciaAutoridadId id = new TieneAudienciaAutoridadId(saved.getId(), req.getAutoridadId());
+            TieneAudienciaAutoridad rel = new TieneAudienciaAutoridad(id, saved, req.getAutoridadId());
 
-            TieneAudienciaAutoridad rel =
-                    new TieneAudienciaAutoridad(id, saved, req.getAutoridadId());
-
-            tieneAudienciaAutoridadRepository.save(rel);
+            saved.getAudienciaAutoridades().add(rel);
         }
 
-        return mapToResponse(saved);
+        if (req.getSalaId() != null) {
+            TieneAudienciaSalaId id = new TieneAudienciaSalaId(saved.getId(), req.getSalaId());
+            TieneAudienciaSala rel = new TieneAudienciaSala(id, saved, req.getSalaId());
+
+            saved.getAudienciaSalas().add(rel);
+        }
+
+        saved = audienciaRepository.save(saved);
+
+        AudienciaResponse response = mapToResponse(saved);
+
+        if (req.getSalaId() != null) {
+            try {
+                SalaClient.SalaDto salaDto = salaClient.getSalaById(req.getSalaId());
+                if (salaDto != null) {
+                    response.setSalaNombre(salaDto.nombre);
+                }
+            } catch (Exception e) {
+                System.out.println("Error obteniendo nombre sala: " + e.getMessage());
+            }
+        }
+
+        if (req.getAutoridadId() != null) {
+            try {
+                AutoridadClient.AutoridadDto aut = autoridadClient.getAutoridadById(req.getAutoridadId());
+                if (aut != null) {
+                    response.setAutoridadNombre(aut.nombre);
+                    response.setAutoridadApellido(aut.apellido);
+                    response.setAutoridadTipo(aut.tipo);
+                }
+            } catch (Exception e) {
+                System.out.println("Error buscando autoridad: " + e.getMessage());
+                response.setAutoridadTipo("Desconocido");
+            }
+        }
+
+        return response;
     }
+
 
     @Transactional
     public AudienciaResponse actualizar(UUID id, AudienciaRequest req) {
@@ -249,6 +302,50 @@ public class AudienciaService {
         r.setFechaCreacion(a.getFechaCreacion());
         r.setFechaModificacion(a.getFechaModificacion());
         r.setFechaInscripcion(a.getFechaInscripcion());
+
+        if (a.getAudienciaSalas() != null && !a.getAudienciaSalas().isEmpty()) {
+            try {
+                UUID salaId = a.getAudienciaSalas().iterator().next().getId().getSalaId();
+
+                SalaClient.SalaDto s = salaClient.getSalaById(salaId);
+                r.setSalaNombre(s != null ? s.nombre : "Sala no encontrada");
+            } catch (Exception e) {
+                r.setSalaNombre("Error Conexión Sala");
+            }
+        } else {
+            r.setSalaNombre("Sin Sala");
+        }
+
+        if (a.getAudienciaAutoridades() != null && !a.getAudienciaAutoridades().isEmpty()) {
+            try {
+                UUID autId = a.getAudienciaAutoridades().iterator().next().getId().getAutoridadId();
+
+                AutoridadClient.AutoridadDto aut = autoridadClient.getAutoridadById(autId);
+
+                if (aut != null) {
+                    r.setAutoridadNombre(aut.nombre);
+                    r.setAutoridadApellido(aut.apellido);
+                    r.setAutoridadTipo(aut.tipo);
+                } else {
+                    r.setAutoridadNombre("Desconocido");
+                }
+            } catch (Exception e) {
+                r.setAutoridadNombre("Sin Conexión");
+            }
+        } else {
+            r.setAutoridadNombre("Sin Autoridad");
+        }
+
         return r;
+    }
+
+    @Transactional
+    public void eliminarFisicamente(UUID id) {
+        Audiencia audiencia = audienciaRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Audiencia no encontrada"));
+
+        audienciaRepository.delete(audiencia);
+
+        audienciaRepository.flush();
     }
 }

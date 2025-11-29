@@ -8,6 +8,7 @@ import java.util.UUID;
 @Data
 public class AutoridadRequest {
     private String nombre;
+    private String apellido;
     private String mail;
     private String estado;
     private String tipo;

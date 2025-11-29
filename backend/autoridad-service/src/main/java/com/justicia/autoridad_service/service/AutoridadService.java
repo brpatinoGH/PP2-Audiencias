@@ -99,6 +99,14 @@ public class AutoridadService {
     }
 
     @Transactional(readOnly = true)
+    public AutoridadResponse buscarPorId(UUID id) {
+        Autoridad autoridad = autoridadRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Autoridad no encontrada con id: " + id));
+
+        return mapToResponse(autoridad);
+    }
+
+    @Transactional(readOnly = true)
     public List<AutoridadResponse> listarTodas() {
         return autoridadRepository.findAll()
                 .stream()
@@ -147,6 +155,7 @@ public class AutoridadService {
         AutoridadResponse res = new AutoridadResponse();
         res.setId(a.getId());
         res.setNombre(a.getNombre());
+        res.setApellido(a.getApellido());
         res.setMail(a.getMail());
         res.setEstado(a.getEstado());
         res.setTipo(a.getTipo() != null ? a.getTipo().name() : null);

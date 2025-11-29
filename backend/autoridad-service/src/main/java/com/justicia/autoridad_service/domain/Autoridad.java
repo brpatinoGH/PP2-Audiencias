@@ -16,6 +16,9 @@ public class Autoridad extends BaseEntity {
     @Column(name = "nombre", length = 255)
     private String nombre;
 
+    @Column(name = "apellido")
+    private String apellido;
+
     @Column(name = "mail", length = 255)
     private String mail;
 

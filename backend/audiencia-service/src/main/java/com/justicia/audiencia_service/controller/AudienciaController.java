@@ -70,4 +70,12 @@ public class AudienciaController {
         return "OK";
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable UUID id) {
+        roleValidator.requireDirectorOrOperador();
+
+        audienciaService.eliminarFisicamente(id);
+        return ResponseEntity.noContent().build();
+    }
+
 }

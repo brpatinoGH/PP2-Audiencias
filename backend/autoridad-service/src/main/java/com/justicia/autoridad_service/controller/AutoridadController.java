@@ -60,6 +60,11 @@ public class AutoridadController {
         return ResponseEntity.ok(autoridadService.cambiarEstado(id, nuevoEstado));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<AutoridadResponse> buscarPorId(@PathVariable UUID id) {
+        return ResponseEntity.ok(autoridadService.buscarPorId(id));
+    }
+
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<String> handleBusinessException(BusinessException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
