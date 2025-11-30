@@ -151,6 +151,15 @@ public class AutoridadService {
         return mapToResponse(autoridadRepository.save(autoridad));
     }
 
+    @Transactional
+    public void eliminarFisicamente(UUID id){
+        Autoridad autoridad = autoridadRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Sala no encontrada"));
+
+        autoridadRepository.delete(autoridad);
+        autoridadRepository.flush();
+    }
+
     private AutoridadResponse mapToResponse(Autoridad a) {
         AutoridadResponse res = new AutoridadResponse();
         res.setId(a.getId());

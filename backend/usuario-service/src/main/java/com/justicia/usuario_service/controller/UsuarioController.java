@@ -20,7 +20,7 @@ import java.util.UUID;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
-    private final RoleValidator roleValidator; // ✅ agregado
+    private final RoleValidator roleValidator;
 
     @PostMapping
     public ResponseEntity<UsuarioResponse> crear(@RequestBody UsuarioRequest request) {
@@ -52,6 +52,7 @@ public class UsuarioController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest req, HttpServletRequest request) {
+        System.out.println(">>> BODY recibido - mail: '" + req.getMail() + "' | contrasena: '" + req.getContrasena() + "'");
         LoginResponse res = usuarioService.login(req);
         request.getSession(true).setAttribute("usuarioId", res.getUsuarioId());
         request.getSession().setAttribute("rol", res.getRol());
@@ -63,4 +64,11 @@ public class UsuarioController {
         return usuarioService.obtenerDistrito(id);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable UUID id){
+        roleValidator.requireDirectorOrOperador();
+
+        usuarioService.eliminarFisicamente(id);
+        return ResponseEntity.noContent().build();
+    }
 }

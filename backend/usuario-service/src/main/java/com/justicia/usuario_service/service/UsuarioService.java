@@ -121,6 +121,7 @@ public class UsuarioService {
 
     @Transactional(readOnly = true)
     public LoginResponse login(LoginRequest req) {
+        System.out.println("BUSCANDO USUARIO POR MAIL: '" + req.getMail() + "'");
         Usuario u = usuarioRepository.findByMail(req.getMail())
                 .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
 
@@ -168,4 +169,12 @@ public class UsuarioService {
     }
 
 
+    @Transactional
+    public void eliminarFisicamente(UUID id){
+        Usuario usuario = usuarioRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Sala no encontrada"));
+
+        usuarioRepository.delete(usuario);
+        usuarioRepository.flush();
+    }
 }

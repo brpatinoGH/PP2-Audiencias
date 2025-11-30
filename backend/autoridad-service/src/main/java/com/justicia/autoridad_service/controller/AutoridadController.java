@@ -6,6 +6,7 @@ import com.justicia.autoridad_service.exception.BusinessException;
 import com.justicia.autoridad_service.exception.NotFoundException;
 import com.justicia.autoridad_service.security.RoleValidator;
 import com.justicia.autoridad_service.service.AutoridadService;
+import feign.Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -63,6 +64,13 @@ public class AutoridadController {
     @GetMapping("/{id}")
     public ResponseEntity<AutoridadResponse> buscarPorId(@PathVariable UUID id) {
         return ResponseEntity.ok(autoridadService.buscarPorId(id));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable UUID id){
+        roleValidator.requireDirectorOrOperador();
+        autoridadService.eliminarFisicamente(id);
+        return ResponseEntity.noContent().build();
     }
 
     @ExceptionHandler(BusinessException.class)

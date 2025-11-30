@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
@@ -22,16 +23,25 @@ public class JwtAuthenticationFilter implements GlobalFilter {
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
         String path = exchange.getRequest().getPath().toString();
-        System.out.println("PATH RAW: '" + path + "'");
+        HttpMethod method = exchange.getRequest().getMethod();
 
-        if (path.matches(".*?/api/usuarios/login/?$")) {
-            System.out.println("LOGIN DETECTADO → NO SE VALIDA TOKEN");
+        System.out.println("PATH: " + path + " | METHOD: " + method);
+
+        boolean esLogin = path.matches(".*?/api/usuarios/login/?$");
+
+        boolean esConsultaAudiencias = path.contains("/api/audiencias") && method == HttpMethod.GET;
+
+        boolean esCors = method == HttpMethod.OPTIONS;
+
+        if (esLogin || esConsultaAudiencias || esCors) {
+            System.out.println("ACCESO PÚBLICO PERMITIDO: " + path);
             return chain.filter(exchange);
         }
 
         String authHeader = exchange.getRequest().getHeaders().getFirst("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            System.out.println("BLOQUEADO: Falta token en ruta protegida");
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
@@ -42,8 +52,6 @@ public class JwtAuthenticationFilter implements GlobalFilter {
             Claims claims = jwtUtil.validarToken(token);
             String userId = claims.getSubject();
             String rol = claims.get("rol", String.class);
-
-            System.out.println("TOKEN VÁLIDO → ROL: " + rol);
 
             ServerHttpRequest modifiedRequest = exchange.getRequest()
                     .mutate()

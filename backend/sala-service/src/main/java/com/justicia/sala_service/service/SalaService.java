@@ -113,4 +113,13 @@ public class SalaService {
         res.setDistritoJudicialId(s.getDistritoJudicialId());
         return res;
     }
+
+    @Transactional
+    public void eliminarFisicamente(UUID id){
+        Sala sala = salaRepository.findById(id)
+        .orElseThrow(() -> new NotFoundException("Sala no encontrada"));
+
+        salaRepository.delete(sala);
+        salaRepository.flush();
+    }
 }

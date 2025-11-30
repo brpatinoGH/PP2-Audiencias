@@ -51,6 +51,14 @@ public class SalaController {
         return salaService.obtenerPorId(id);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable UUID id) {
+        roleValidator.requireDirectorOrOperador();
+
+        salaService.eliminarFisicamente(id);
+        return ResponseEntity.noContent().build();
+    }
+
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<String> handleBusinessException(BusinessException ex) {
