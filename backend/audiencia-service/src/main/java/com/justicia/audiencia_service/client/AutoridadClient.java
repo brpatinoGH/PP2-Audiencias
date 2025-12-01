@@ -1,6 +1,7 @@
 package com.justicia.audiencia_service.client;
 
 import com.justicia.audiencia_service.config.FeignConfig;
+import lombok.Data;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -12,6 +13,7 @@ public interface AutoridadClient {
     @GetMapping("/api/autoridades/{id}")
     AutoridadDto getAutoridadById(@PathVariable("id") UUID id);
 
+    @Data
     class AutoridadDto {
         public UUID id;
         public String nombre;

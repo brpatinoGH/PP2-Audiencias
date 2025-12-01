@@ -170,11 +170,14 @@ public class UsuarioService {
 
 
     @Transactional
-    public void eliminarFisicamente(UUID id){
+    public void eliminarFisicamente(UUID id) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Sala no encontrada"));
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
+
+        tieneUsuarioDistritoRepository.deleteByIdUsuarioId(id);
 
         usuarioRepository.delete(usuario);
+
         usuarioRepository.flush();
     }
 }

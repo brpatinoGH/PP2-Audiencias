@@ -63,6 +63,18 @@ public class AudienciaService {
         a.setCreadoPorUsuarioId(usuarioId);
 
         if (req.getAutoridadId() != null) {
+            AutoridadClient.AutoridadDto autoridadDto = autoridadClient.getAutoridadById(req.getAutoridadId());
+
+            if (autoridadDto == null) {
+                throw new NotFoundException("La autoridad indicada no existe");
+            }
+
+            if ("INACTIVO".equalsIgnoreCase(autoridadDto.getEstado())) {
+                throw new BusinessException(
+                        "No se puede asignar una autoridad INACTIVA (estado recibido: " + autoridadDto.getEstado() + ")"
+                );
+            }
+
             validarDisponibilidadAutoridad(
                     req.getAutoridadId(),
                     req.getFechaInscripcion(),
@@ -121,6 +133,8 @@ public class AudienciaService {
 
         if (req.getAutoridadId() != null) {
             try {
+                // Ya la buscamos arriba para validar, pero aquí la buscamos de nuevo para la respuesta
+                // (o podrías reutilizar la variable 'autoridadDto' si refactorizas un poco más)
                 AutoridadClient.AutoridadDto aut = autoridadClient.getAutoridadById(req.getAutoridadId());
                 if (aut != null) {
                     response.setAutoridadNombre(aut.nombre);
