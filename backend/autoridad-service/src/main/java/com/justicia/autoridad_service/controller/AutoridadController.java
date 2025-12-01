@@ -6,6 +6,7 @@ import com.justicia.autoridad_service.exception.BusinessException;
 import com.justicia.autoridad_service.exception.NotFoundException;
 import com.justicia.autoridad_service.security.RoleValidator;
 import com.justicia.autoridad_service.service.AutoridadService;
+import feign.Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,11 +21,11 @@ import java.util.UUID;
 public class AutoridadController {
 
     private final AutoridadService autoridadService;
-    private final RoleValidator roleValidator; // ✅ agregado
+    private final RoleValidator roleValidator;
 
     @PostMapping
     public ResponseEntity<AutoridadResponse> crear(@RequestBody AutoridadRequest request) {
-        roleValidator.requireDirector();
+        roleValidator.requireDirectorOrOperador();
         AutoridadResponse response = autoridadService.crear(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -33,7 +34,7 @@ public class AutoridadController {
     public ResponseEntity<AutoridadResponse> actualizar(
             @PathVariable UUID id,
             @RequestBody AutoridadRequest request) {
-        roleValidator.requireDirector();
+        roleValidator.requireDirectorOrOperador();
         return ResponseEntity.ok(autoridadService.actualizar(id, request));
     }
 
@@ -56,8 +57,20 @@ public class AutoridadController {
     public ResponseEntity<AutoridadResponse> cambiarEstado(
             @PathVariable UUID id,
             @RequestParam String nuevoEstado) {
-        roleValidator.requireDirector();
+        roleValidator.requireDirectorOrOperador();
         return ResponseEntity.ok(autoridadService.cambiarEstado(id, nuevoEstado));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<AutoridadResponse> buscarPorId(@PathVariable UUID id) {
+        return ResponseEntity.ok(autoridadService.buscarPorId(id));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable UUID id){
+        roleValidator.requireDirectorOrOperador();
+        autoridadService.eliminarFisicamente(id);
+        return ResponseEntity.noContent().build();
     }
 
     @ExceptionHandler(BusinessException.class)

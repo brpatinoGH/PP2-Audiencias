@@ -1,19 +1,19 @@
 package com.justicia.audiencia_service.domain;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
 @Entity
 @Table(name = "audiencia")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Audiencia extends BaseEntity {
@@ -45,12 +45,14 @@ public class Audiencia extends BaseEntity {
     @Column(name = "fecha_inscripcion")
     private LocalDateTime fechaInscripcion;
 
-    // Relación con Usuario (solo UUID, no entidad completa)
     @Column(name = "creado_por_usuario_id", columnDefinition = "UUID")
     private UUID creadoPorUsuarioId;
 
     @Column(name = "modificado_por_usuario_id", columnDefinition = "UUID")
     private UUID modificadoPorUsuarioId;
+
+    @Column(name = "distrito_id", columnDefinition = "UUID", nullable = false)
+    private UUID distritoId;
 
     @OneToMany(mappedBy = "audiencia", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UsuarioAudienciaAccion> acciones = new HashSet<>();
@@ -58,4 +60,19 @@ public class Audiencia extends BaseEntity {
     @OneToMany(mappedBy = "audiencia", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TieneAudienciaSala> audienciaSalas = new HashSet<>();
 
+    @OneToMany(mappedBy = "audiencia", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<TieneAudienciaAutoridad> audienciaAutoridades = new HashSet<>();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Audiencia audiencia = (Audiencia) o;
+        return getId() != null && Objects.equals(getId(), audiencia.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

@@ -18,4 +18,7 @@ public class AudienciaRequest {
     private String estado;
 
     private UUID autoridadId;
+    private UUID distritoId;
+
+    private UUID salaId;
 }

@@ -26,15 +26,18 @@ spring:
           predicates:
             - Path=/api/distritos/**
       globalcors:
-        corsConfigurations:
-          "[/**]":
-            allowedOrigins: "*"
-            allowedMethods:
-              - GET
-              - POST
-              - PUT
-              - DELETE
-              - PATCH
+#        cors-configurations:
+#          '[/**]':
+#            allowedOrigins: "http://localhost:4200"
+#            allowedMethods:
+#              - GET
+#              - POST
+#              - PUT
+#              - DELETE
+#              - OPTIONS
+#              - PATCH
+#            allowedHeaders: "*"
+#            allowCredentials: true
 logging:
   level:
     org.springframework.cloud.gateway: DEBUG

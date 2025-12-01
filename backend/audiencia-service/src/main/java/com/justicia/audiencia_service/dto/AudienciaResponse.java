@@ -20,4 +20,9 @@ public class AudienciaResponse {
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaModificacion;
     private LocalDateTime fechaInscripcion;
+
+    private String salaNombre;
+    private String autoridadNombre;
+    private String autoridadApellido;
+    private String autoridadTipo;
 }

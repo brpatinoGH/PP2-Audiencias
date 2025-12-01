@@ -11,4 +11,7 @@ public class AutoridadResponse {
     private String mail;
     private String estado;
     private String tipo;
+    private UUID distritoId;
+    private String apellido;
 }
+
