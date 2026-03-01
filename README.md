@@ -42,7 +42,6 @@ El repositorio se organiza principalmente en el módulo de backend:
 **Brunella Valentina Patiño**
 * Desarrolladora de Software enfocada en Backend.
 * Estudiante de IES (Finalizado 2026).
-* [LinkedIn]: https://www.linkedin.com/in/brunella-pati%C3%B1o-43a09929b/
-
+* [LinkedIn](https://www.linkedin.com/in/brunella-pati%C3%B1o-43a09929b/)
 ---
 *Este proyecto fue desarrollado bajo una metodología de enfoque en resolución de problemas y trabajo en equipo.*
