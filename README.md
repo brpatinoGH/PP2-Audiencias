@@ -9,7 +9,7 @@ Este proyecto forma parte de mi **Práctica Profesionalizante 2** en la Tecnicat
 * **Gestión de Dependencias:** Maven
 * **Herramientas de Desarrollo:** IntelliJ IDEA
 * **Persistencia:** Spring Data JPA (PostgreSQL/MySQL) 
-* **Arquitectura:** Monolito/Microservicios (según corresponda a tu entrega)
+* **Arquitectura:** Microservicios
 
 ## 🛠️ Funcionalidades Principales
 
